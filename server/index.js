@@ -1,0 +1,80 @@
+const express = require('express')
+const fs = require('fs')
+const path = require('path')
+const yaml = require('js-yaml')
+
+const app = express()
+app.use(express.json({ limit: '10mb' }))
+
+const CRDS_DIR = path.join(__dirname, '..', 'crds')
+const MANIFESTS_DIR = path.join(__dirname, '..', 'manifests')
+
+if (!fs.existsSync(MANIFESTS_DIR)) {
+  fs.mkdirSync(MANIFESTS_DIR, { recursive: true })
+}
+
+const schemaCache = new Map()
+
+function extractSchemaFromCrd(crd) {
+  const spec = crd.spec
+  const kind = spec.names.kind
+  const group = spec.group
+  const scope = spec.scope
+
+  const versions = spec.versions || []
+  const version = versions.find(v => v.storage) || versions[0]
+  const versionName = version?.name || 'v1'
+  const apiVersion = `${group}/${versionName}`
+
+  const openAPIV3Schema = version?.schema?.openAPIV3Schema || {}
+  const specSchema = openAPIV3Schema.properties?.spec || { type: 'object', properties: {} }
+
+  return { kind, group, apiVersion, scope, versionName, specSchema }
+}
+
+app.get('/api/crds', (req, res) => {
+  try {
+    const files = fs.readdirSync(CRDS_DIR)
+      .filter(f => f.endsWith('.yaml') || f.endsWith('.yml'))
+    res.json(files)
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+app.get('/api/crds/:filename', (req, res) => {
+  const filename = req.params.filename
+  if (schemaCache.has(filename)) {
+    return res.json(schemaCache.get(filename))
+  }
+  try {
+    const filepath = path.join(CRDS_DIR, filename)
+    const content = fs.readFileSync(filepath, 'utf8')
+    const crd = yaml.load(content)
+    const schema = extractSchemaFromCrd(crd)
+    schemaCache.set(filename, schema)
+    res.json(schema)
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+app.post('/api/manifests', (req, res) => {
+  const { filename, content } = req.body
+  if (!filename || !content) {
+    return res.status(400).json({ error: 'filename and content required' })
+  }
+  const safe = path.basename(filename)
+  const filepath = path.join(MANIFESTS_DIR, safe)
+  try {
+    fs.writeFileSync(filepath, content, 'utf8')
+    res.json({ path: `manifests/${safe}` })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+const PORT = 3001
+app.listen(PORT, () => {
+  console.log(`API server running on http://localhost:${PORT}`)
+})
