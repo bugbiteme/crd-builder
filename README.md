@@ -61,7 +61,7 @@ crds/
    - Array fields have add / remove controls
    - Map fields (`additionalProperties`) have a key-value editor
    - Hover the **ⓘ** icon on any field to see its description
-3. **Preview YAML** in the right panel — updates live as you type.
+3. **Preview YAML** in the right panel — updates live as you type. Drag the divider between the form and preview to resize either panel.
 4. **Copy** the YAML to clipboard or click **Create** to write the manifest to `manifests/`.
 
 Generated files are saved as `manifests/<kind>-<name>.yaml` (e.g. `manifests/destinationrule-my-rule.yaml`).

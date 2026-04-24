@@ -53,8 +53,20 @@ body {
   height: 52px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   flex-shrink: 0;
   border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.header-github {
+  color: rgba(255,255,255,0.55);
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+
+.header-github:hover {
+  color: white;
 }
 
 .header-inner {
@@ -85,20 +97,31 @@ body {
 
 /* ─── Layout ─────────────────────────────────────── */
 .app-main {
-  display: grid;
-  grid-template-columns: 1040px 1fr;
+  display: flex;
   flex: 1;
   overflow: hidden;
 }
 
 .sidebar {
   background: white;
-  border-right: 1px solid var(--gray-200);
   overflow-y: auto;
   padding: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0;
+  flex-shrink: 0;
+}
+
+.resize-divider {
+  width: 5px;
+  flex-shrink: 0;
+  background: var(--gray-200);
+  cursor: col-resize;
+  transition: background 0.15s;
+}
+
+.resize-divider:hover {
+  background: var(--blue);
 }
 
 .preview-area {
@@ -106,6 +129,8 @@ body {
   flex-direction: column;
   overflow: hidden;
   background: #1e1e2e;
+  flex: 1;
+  min-width: 0;
 }
 
 /* ─── CRD Selector ───────────────────────────────── */
