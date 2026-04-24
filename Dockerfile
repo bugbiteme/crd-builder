@@ -1,30 +1,25 @@
 # ─── Stage 1: build frontend ─────────────────────────────────────────────────
-FROM node:25-alpine AS builder
-WORKDIR /app
+FROM registry.access.redhat.com/ubi9/nodejs-22 AS builder
+WORKDIR /opt/app-root/src
 COPY package*.json ./
 RUN npm ci
 COPY . .
 RUN npm run build
 
 # ─── Stage 2: production image ───────────────────────────────────────────────
-FROM node:25-alpine
-WORKDIR /app
+FROM registry.access.redhat.com/ubi9/nodejs-22-minimal
+WORKDIR /opt/app-root/src
 
 COPY package*.json ./
 RUN npm ci --omit=dev
 
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /opt/app-root/src/dist ./dist
 COPY server/ ./server/
 COPY crds/ ./crds/
 
-# OpenShift assigns arbitrary UIDs at runtime within the root group (GID 0).
-# Setting ownership to 1001:0 with g=u lets any such UID read and write.
-RUN mkdir -p manifests \
-    && chown -R 1001:0 /app \
-    && chmod -R g=u /app
+# manifests/ must be group-writable for OpenShift's arbitrary UID (GID 0)
+RUN mkdir -p manifests && chmod g=u manifests
 
 EXPOSE 3001
-
-USER 1001
 
 CMD ["node", "server/index.js"]

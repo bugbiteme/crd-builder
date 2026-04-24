@@ -29,8 +29,8 @@ Run it, mounting your local `crds/` and `manifests/` directories so you can add 
 
 ```bash
 podman run -p 3001:3001 \
-  -v ./crds:/app/crds:Z \
-  -v ./manifests:/app/manifests:Z \
+  -v ./crds:/opt/app-root/src/crds:Z \
+  -v ./manifests:/opt/app-root/src/manifests:Z \
   crd-builder
 ```
 
