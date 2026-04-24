@@ -4,7 +4,7 @@ Dynamically generate a user-friendly form from Kubernetes CustomResourceDefiniti
 
 ## Requirements
 
-- Node.js 18+
+- Node.js 20.19+ or 22.12+
 - npm
 
 ## Setup
@@ -41,6 +41,7 @@ crds/
    - Nested objects render as collapsible sections
    - Array fields have add / remove controls
    - Map fields (`additionalProperties`) have a key-value editor
+   - Hover the **ⓘ** icon on any field to see its description
 3. **Preview YAML** in the right panel — updates live as you type.
 4. **Copy** the YAML to clipboard or click **Create** to write the manifest to `manifests/`.
 
@@ -53,6 +54,6 @@ crd-builder/
 ├── crds/          CRD YAML files (input)
 ├── manifests/     Generated manifest files (output)
 ├── server/        Express API server (port 3001)
-├── src/           React frontend (Vite, port 3000)
+├── src/           React 19 frontend (Vite 8, port 3000)
 └── package.json
 ```
