@@ -1,4 +1,46 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
+
+function Tooltip({ text }) {
+  const [pos, setPos] = useState(null)
+
+  const onEnter = useCallback(e => {
+    const r = e.currentTarget.getBoundingClientRect()
+    setPos({ x: r.left + r.width / 2, y: r.top })
+  }, [])
+
+  return (
+    <span
+      className="field-desc"
+      onMouseEnter={onEnter}
+      onMouseLeave={() => setPos(null)}
+    >
+      ⓘ
+      {pos && (
+        <span
+          style={{
+            position: 'fixed',
+            left: pos.x,
+            top: pos.y - 8,
+            transform: 'translate(-50%, -100%)',
+            background: '#111827',
+            color: '#f9fafb',
+            padding: '5px 9px',
+            borderRadius: '5px',
+            fontSize: '0.6875rem',
+            lineHeight: '1.45',
+            maxWidth: '260px',
+            whiteSpace: 'normal',
+            zIndex: 1000,
+            pointerEvents: 'none',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
+          }}
+        >
+          {text}
+        </span>
+      )}
+    </span>
+  )
+}
 
 function PrimitiveField({ schema, value, onChange, placeholder }) {
   if (schema.enum) {
@@ -195,9 +237,7 @@ function FieldRow({ name, schema, value, onChange, isRequired, depth, showOption
       <label className="field-label">
         {name}
         {isRequired && <span className="required-star">*</span>}
-        {schema.description && (
-          <span className="field-desc" title={schema.description}>ⓘ</span>
-        )}
+        {schema.description && <Tooltip text={schema.description} />}
       </label>
       <div className="field-input">
         <FieldRenderer
