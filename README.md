@@ -2,24 +2,43 @@
 
 Dynamically generate a user-friendly form from Kubernetes CustomResourceDefinition (CRD) YAML files to build k8s manifests.
 
-## Requirements
+## Running locally
 
-- Node.js 20.19+ or 22.12+
-- npm
-
-## Setup
+**Requirements:** Node.js 20.19+ or 22.12+, npm
 
 ```bash
 npm install
-```
-
-## Usage
-
-```bash
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+The dev server (Vite, port 3000) proxies `/api` requests to the Express backend on port 3001. Both start together with `npm run dev`.
+
+## Running with Podman
+
+**Requirements:** Podman 4+
+
+Build the image:
+
+```bash
+podman build -t crd-builder .
+```
+
+Run it, mounting your local `crds/` and `manifests/` directories so you can add CRDs and retrieve generated manifests without rebuilding:
+
+```bash
+podman run -p 3001:3001 \
+  -v ./crds:/app/crds:Z \
+  -v ./manifests:/app/manifests:Z \
+  crd-builder
+```
+
+Open [http://localhost:3001](http://localhost:3001) in your browser.
+
+The `:Z` flag sets the correct SELinux label on the bind mounts, required on RHEL/Fedora hosts. Omit it on macOS or other non-SELinux systems.
+
+To deploy on OpenShift, push the image to your registry and apply a `Deployment` + `Service` + `Route`. The image is already non-root and OpenShift-compatible (arbitrary UID, GID 0 group writes).
 
 ## Adding CRDs
 
@@ -55,5 +74,6 @@ crd-builder/
 ├── manifests/     Generated manifest files (output)
 ├── server/        Express API server (port 3001)
 ├── src/           React 19 frontend (Vite 8, port 3000)
+├── Dockerfile
 └── package.json
 ```

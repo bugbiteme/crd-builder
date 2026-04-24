@@ -74,7 +74,16 @@ app.post('/api/manifests', (req, res) => {
   }
 })
 
-const PORT = 3001
+// Serve built frontend in production
+const distDir = path.join(__dirname, '..', 'dist')
+if (fs.existsSync(distDir)) {
+  app.use(express.static(distDir))
+  app.get('/{*path}', (req, res) => {
+    res.sendFile(path.join(distDir, 'index.html'))
+  })
+}
+
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
-  console.log(`API server running on http://localhost:${PORT}`)
+  console.log(`Server running on http://localhost:${PORT}`)
 })
